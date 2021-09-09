@@ -1,0 +1,58 @@
+version: "3.6"
+services:
+    php-apache:
+        image: registry.gitlab.com/andersonpem/apache-php-zsh:7.3-comp2
+        restart: always
+        volumes:
+            - ./code:/var/www/html
+        ports:
+            - ${APACHE_PORT}:80
+    
+        environment:
+#           General settings
+            #Ext enable
+            PHP_EXTENSIONS: ${PHP_EXTENSIONS}
+            TZ: ${TZ}
+            TEMPLATE_PHP_INI: ${TEMPLATE_PHP_INI}
+            
+            # PHPStorm Settings
+            PHP_IDE_CONFIG: ${PHP_IDE_CONFIG}
+            #PHP.ini settings
+            PHP_INI_UPLOAD_MAX_FILESIZE: ${PHP_INI_UPLOAD_MAX_FILESIZE}
+            PHP_INI_MAX_EXECUTION_TIME: ${PHP_INI_MAX_EXECUTION_TIME}
+            PHP_INI_MEMORY_LIMIT: ${PHP_INI_MEMORY_LIMIT}
+            PHP_INI_DISPLAY_ERRORS: ${PHP_INI_DISPLAY_ERRORS}
+            PHP_INI_DATE__TIMEZONE: ${TZ}
+            PHP_INI_SHORT_OPEN_TAG: ${PHP_INI_SHORT_OPEN_TAG}
+            APACHE_DOCUMENT_ROOT: ${DOCUMENT_ROOT}
+#           Debug only
+            PHP_EXTENSION_XDEBUG: ${PHP_EXTENSION_XDEBUG}
+            PHP_INI_XDEBUG__REMOTE_ENABLE: ${PHP_INI_XDEBUG__REMOTE_ENABLE}
+            PHP_INI_XDEBUG__REMOTE_HOST: ${XDEBUG_REMOTE_HOST}
+            PHP_INI_XDEBUG__REMOTE_HANDLER: "dbgp"
+            PHP_INI_XDEBUG__REMOTE_PORT: ${PHP_INI_XDEBUG__REMOTE_PORT}
+            PHP_INI_XDEBUG__REMOTE_AUTOSTART: "1"
+            PHP_INI_XDEBUG__REMOTE_CONNECT_BACK: "off"
+            PHP_INI_XDEBUG__IDEKEY: ${PHP_INI_XDEBUG__IDEKEY}
+            # PHP_INI_XDEBUG__REMOTE_LOG: "xdebug.log"
+            PHP_INI_ERROR_REPORTING: ${PHP_INI_ERROR_REPORTING}
+            #Production Settings
+            # TEMPLATE_PHP_INI: production
+            DOCKER_USER: ${DOCKER_USER}
+            APACHE_RUN_USER: ${APACHE_RUN_USER}
+            APACHE_RUN_GROUP: ${APACHE_RUN_GROUP}
+
+    mysql:
+        image: mariadb
+        restart: unless-stopped
+        ports:
+            - ${MYSQL_PORT}:3306
+        volumes:
+            - ./data/mysql:/var/lib/mysql:delegated
+        environment:
+            - MYSQL_DATABASE=${MYSQL_DATABASE}
+            - MYSQL_USER=${MYSQL_USER}
+            - MYSQL_PASSWORD=$MYSQL_PASSWORD
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+            - ${TZ}
+        command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
